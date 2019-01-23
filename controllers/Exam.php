@@ -20,7 +20,7 @@ class Exam
         $this->data = $params;
         //Open database connection
         $this->pdo = apx_pdoConn::getConnection();
-          $this->exam = $this->getExam();
+        $this->exam = $this->getExam();
     }
 
     public function getTreeAction()
@@ -56,21 +56,47 @@ class Exam
 
     public function submitAnswerAction()
     {
-        error_log(print_r($this->data['data'],1));
+        $answer = $this->data['data'];
+        $questionArr = explode(',',$this->exam->QuestionsAsked);
+
+        $this->exam->AnswersGiven .= ',' . $answer;
+     
+        $this->exam->AnswersGiven = trim($this->exam->AnswersGiven,",");
+    
+        // $this->exam->save();
+        $nextQuestion = $this->getNextQuestion();
+
+        $this->exam->QuestionsAsked .= ',' . $nextQuestion->ID;
+        $this->exam->QuestionsAsked = trim($this->exam->QuestionsAsked,",");
+
+        $this->exam->save();
 
 
-        return ['winning'];
+        return ['success'=>true];
     }
 
-    private function isQuestionCorrect()
+    private function getNextQuestion()
     {
 
+        $questionArr = explode(',',$this->exam->QuestionsAsked);
+        $answerArr = explode(',',$this->exam->AnswersGiven);
+
+
+        $answer = DB::table('journey_answers')
+                    ->where('ID',end($answerArr))
+                    ->first();
+
+
+        $question = DB::table('journey_questions')
+                    ->where('ID',$answer->NextQuestionID)
+                    ->first();
+
+        return $question;
     }
 
     private function getExam()
     {
-        $exam = DB::table('journey_results')
-                        ->where('UserID',$this->user->ID)
+        $exam = JourneyResults::where('UserID',$this->user->ID)
                         ->first();
         if(empty($exam))
         {
@@ -86,7 +112,7 @@ class Exam
         $exam->UserID = $this->user->ID;
         $exam->JourneyTreeID = 1;
         $exam->JourneyStarted = date("Y-m-d H:i:s");
-        $exam->QuestionsAsked = $this->getExamMaster()->QuestionID;
+        $exam->QuestionsAsked = $this->getExamMaster()->MasterQuestionID;
         $exam->save();
         return $this->getExam();
     }
@@ -94,8 +120,8 @@ class Exam
     private function getExamMaster()
     {
         $master = DB::table('journey_paths')
-                        ->where('TreeID','1')
-                        ->where('Master','Y')
+                        ->where('ForestID','1')//need to get the journey ID they are launching
+                        ->where('TreeOrder','1')
                         ->first();
         return $master;
 

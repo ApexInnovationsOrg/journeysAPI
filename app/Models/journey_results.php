@@ -12,7 +12,7 @@ class journey_results extends Eloquent {
 	 */
 	protected $table = 'journey_results';
 
-
-	protected $fillable = array('ID','JourneyTreeID','UserID','Score','QuestionsAsked','AnswersGiven','JourneyStarted','JourneyCompleted');
+	protected $primaryKey = 'ID';
+	protected $fillable = array('JourneyTreeID','UserID','Score','QuestionsAsked','AnswersGiven','JourneyStarted','JourneyCompleted');
 
 }
