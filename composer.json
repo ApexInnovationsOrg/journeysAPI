@@ -1,0 +1,17 @@
+{
+    "require": {
+        "vlucas/phpdotenv": "*",
+		"predis/predis":"*",
+        "illuminate/database": "5.1.*"
+    },
+    "autoload": {
+        "psr-4":{
+            "app\\": "app",
+            "controllers\\":"controllers"
+        },
+        "classmap":[
+            "vendor/autoload.php",
+            "../classes"
+        ]
+    }
+}
