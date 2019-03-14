@@ -43,6 +43,14 @@ class Exam
         return $results;
     }
 
+    public function completeExam()
+    {
+        $this->exam->JourneyCompleted = date("Y-m-d H:i:s");
+        $this->exam->Score = 93;
+        $this->exam->save();
+
+    }
+
     public function getAnswersAction()
     {
 
@@ -71,12 +79,17 @@ class Exam
 
         $this->exam->save();
 
+        //run complete exam routine;
 
-        return ['success'=>true];
+        return ['success'=>true,'examComplete'=>$nextQuestion->ID == -1];
+        
+
+        // return ['success'=>true];
     }
 
     private function getNextQuestion()
     {
+
 
         $questionArr = explode(',',$this->exam->QuestionsAsked);
         $answerArr = explode(',',$this->exam->AnswersGiven);
@@ -86,17 +99,34 @@ class Exam
                     ->where('ID',end($answerArr))
                     ->first();
 
+        
 
         $question = DB::table('journey_questions')
                     ->where('ID',$answer->NextQuestionID)
                     ->first();
 
+
+
+        if($answer->NextQuestionID === -1)
+        {
+            $this->completeExam();
+            return (object)['ID'=>-1];
+        }
+
         return $question;
     }
+
+    public function getExamResultsAction()
+    {
+        return ['completed'=>$this->exam->JourneyCompleted,'score'=>$this->exam->Score,'numberOfQuestions'=>count(explode(',', $this->exam->QuestionsAsked))];
+    }
+
+    
 
     private function getExam()
     {
         $exam = JourneyResults::where('UserID',$this->user->ID)
+                        ->where('JourneyCompleted',null)
                         ->first();
         if(empty($exam))
         {
@@ -112,7 +142,7 @@ class Exam
         $exam->UserID = $this->user->ID;
         $exam->JourneyTreeID = 1;
         $exam->JourneyStarted = date("Y-m-d H:i:s");
-        $exam->QuestionsAsked = $this->getExamMaster()->MasterQuestionID;
+        $exam->QuestionsAsked = $this->getExamMaster()->QuestionID;
         $exam->save();
         return $this->getExam();
     }
@@ -120,8 +150,8 @@ class Exam
     private function getExamMaster()
     {
         $master = DB::table('journey_paths')
-                        ->where('ForestID','1')//need to get the journey ID they are launching
-                        ->where('TreeOrder','1')
+                        ->where('TreeID','1')//need to get the journey ID they are launching
+                        ->where('Master','Y')
                         ->first();
         return $master;
 

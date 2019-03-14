@@ -40,6 +40,11 @@ class Answer
         $write->execute($params);
         return true;
     }
+    public function updateanswerAction()
+    {
+        $write = $this->pdo->prepare("UPDATE journey_answers SET AnswerText = :answerText WHERE ID = :answerID");
+        $write->execute([':answerText' => $this->data['answerText'],':answerID'=>$this->data['answerID']]);
+    }
 
 
 

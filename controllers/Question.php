@@ -20,7 +20,6 @@ class Question
         $this->data = $params;
         //Open database connection
         $this->pdo = apx_pdoConn::getConnection();
-       error_log('constructing');
         
     }
 
@@ -49,6 +48,12 @@ class Question
         return false;
     }
 
+    public function updatequestionAction()
+    {
+        $write = $this->pdo->prepare("UPDATE journey_questions SET QuestionText = :questionText WHERE ID = :questionID");
+        $write->execute([':questionText' => $this->data['questionText'],':questionID'=>$this->data['questionID']]);
+    }
+
     public function moveQuestionAction()
     {
 
@@ -57,6 +62,21 @@ class Question
         // error_log(print_r($params,1));
         $write->execute($params);
         return true;
+    }
+
+    protected function nullOutAnswers($questionID)
+    {
+        $write = $this->pdo->prepare("UPDATE journey_answers SET NextQuestionID = -1 WHERE NextQuestionID = :questionID");
+        $write->execute([':questionID'=>$questionID]);
+    }
+
+    public function deleteQuestionAction()
+    {
+        $write = $this->pdo->prepare("UPDATE journey_questions SET TreeID = TreeID * -1 WHERE ID = :questionID");
+        $write->execute([':questionID'=>$this->data['questionID']]);
+
+        $this->nullOutAnswers($this->data['questionID']);
+
     }
 
 
