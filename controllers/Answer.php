@@ -46,6 +46,16 @@ class Answer
         $write->execute([':answerText' => $this->data['answerText'],':answerID'=>$this->data['answerID']]);
     }
 
+    public function createnewanswerAction()
+    {
+        $write = $this->pdo->prepare("INSERT INTO journey_answers (AnswerText, QuestionID, NextQuestionID, Weight) VALUE (:answerText, :questionID, '-1', '0')");
+        $write->execute([':answerText'=>$this->data['answerText'],':questionID'=>$this->data['questionID']]);
+
+        $answerID = $this->pdo->lastInsertId();
+
+        return $answerID;
+    }
+
 
 
 }
