@@ -63,7 +63,7 @@ class Forest
 
     private function getAnswers($questionID)
     {   
-        $read = $this->pdo->prepare('SELECT * FROM journey_answers WHERE QuestionID = :questionID');
+        $read = $this->pdo->prepare('SELECT JA.*,JF.ID AS `FollowupTextID`,JF.FollowupText FROM journey_answers JA LEFT JOIN journey_followups JF ON JF.AnswerID = JA.ID WHERE QuestionID = :questionID');
         $read->execute([':questionID'=>$questionID]);
         $answers = $read->fetchAll(PDO::FETCH_ASSOC);
 

@@ -42,8 +42,51 @@ class Answer
     }
     public function updateanswerAction()
     {
-        $write = $this->pdo->prepare("UPDATE journey_answers SET AnswerText = :answerText WHERE ID = :answerID");
-        $write->execute([':answerText' => $this->data['answerText'],':answerID'=>$this->data['answerID']]);
+        if($this->data['answerID'] == '-1')
+        {
+            $this->data['answerID'] = $this->createnewanswerAction();
+        }
+
+        if(isset($this->data['answerWeight']))
+        {
+            $write = $this->pdo->prepare("UPDATE journey_answers SET AnswerText = :answerText, `Weight` = :answerWeight WHERE ID = :answerID");
+            $write->execute([':answerText' => $this->data['answerText'],':answerWeight'=>$this->data['answerWeight'],':answerID'=>$this->data['answerID']]);
+        }
+        else
+        {
+            $write = $this->pdo->prepare("UPDATE journey_answers SET AnswerText = :answerText WHERE ID = :answerID");
+            $write->execute([':answerText' => $this->data['answerText'],':answerID'=>$this->data['answerID']]);
+        }
+
+        if(isset($this->data['followupText']))
+        {
+            if(!isset($this->data['followupTextID']) || $this->data['followupTextID'] == null)
+            {
+                $this->createFollowupText();
+            }
+            else
+            {
+                $write = $this->pdo->prepare("UPDATE journey_followups SET FollowupText = :followupText WHERE ID = :followupTextID");
+                $write->execute([':followupText' => $this->data['followupText'],':followupTextID'=>$this->data['followupTextID']]);
+            }
+        }
+    }
+
+    public function deleteanswerAction()
+    {
+        if(isset($this->data['answerID']))
+        {
+            $delete = $this->pdo->prepare("UPDATE journey_answers SET QuestionID = QuestionID * -1 WHERE ID = :answerID");
+            $delete->execute([':answerID'=>$this->data['answerID']]);
+        }
+    }
+
+    public function createFollowupText()
+    {
+        $write = $this->pdo->prepare("INSERT INTO journey_followups (FollowupText,AnswerID) VALUES (:followupText,:answerID)");
+        $params = [':followupText'=>$this->data['followupText'],':answerID'=>$this->data['answerID']];
+        $write->execute($params);
+        return $this->pdo->lastInsertId();
     }
 
     public function createnewanswerAction()
