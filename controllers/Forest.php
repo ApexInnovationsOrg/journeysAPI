@@ -70,6 +70,12 @@ class Forest
         return $answers;
     }
 
-
+    public function setMasterQuestionAction()
+    {
+        $write = $this->pdo->prepare("UPDATE journey_trees SET MasterQuestionID = :masterQuestionID WHERE ID = :treeID");
+                                      
+        $write->execute([':masterQuestionID'=>$this->data['masterQuestionID'],':treeID'=>$this->data['treeID']]);
+        
+    }
 
 }
