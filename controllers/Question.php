@@ -34,10 +34,17 @@ class Question
 
     public function createNewQuestionAction()
     {
+        
         $write = $this->pdo->prepare("INSERT INTO `ApexProducts`.`journey_questions` (`QuestionText`, `Active`, `TreeID`) VALUES (:questionText, 'Y', :treeID);");
         $write->execute([':questionText'=>$this->data['question'],':treeID'=>$this->data['treeID']]);
 
         $questionID = $this->pdo->lastInsertId();
+
+        if(isset($this->data['positionX']) && isset($this->data['positionY']))
+        {
+            $write = $this->pdo->prepare("UPDATE journey_questions SET PositionX = :positionX, PositionY = :positionY WHERE ID = :questionID");
+            $write->execute([':positionX'=>$this->data['positionX'],':positionY'=>$this->data['positionY'],':questionID'=>$questionID]);   
+        }
 
         foreach ($this->data['answers'] as $answer) {
             $writeAnswer = $this->pdo->prepare("INSERT INTO ApexProducts.journey_answers (AnswerText,QuestionID,NextQuestionID,Weight) VALUES (:answerText,:questionID,'-1','0')");
@@ -59,7 +66,6 @@ class Question
 
         $write = $this->pdo->prepare("UPDATE journey_questions SET PositionX = :positionX, PositionY = :positionY WHERE ID = :questionID");
         $params = [':positionX'=>$this->data['positionX'],':positionY'=>$this->data['positionY'],':questionID'=>$this->data['questionID']];
-        // error_log(print_r($params,1));
         $write->execute($params);
         return true;
     }
