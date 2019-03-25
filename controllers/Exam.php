@@ -71,7 +71,6 @@ class Exam
      
         $this->exam->AnswersGiven = trim($this->exam->AnswersGiven,",");
     
-        // $this->exam->save();
         $nextQuestion = $this->getNextQuestion();
 
         $this->exam->QuestionsAsked .= ',' . $nextQuestion->ID;
@@ -81,12 +80,23 @@ class Exam
 
         //run complete exam routine;
 
-        return ['success'=>true,'followUp'=>'That’s correct. Patients presenting with signs and symptoms of an ischemic stroke should begin certain treatments within 4.5 hours. Therefore, asking about the timing of the onset of symptoms can help determine the course of treatment. Asking about the timing of the last meal and the disposition of medications from home take a lesser priority at this time.
-(The links are references…perhaps we can use them as documents as well.)
-https://www.ahajournals.org/doi/abs/10.1161/STR.0000000000000158','examComplete'=>$nextQuestion->ID == -1];
+        return ['success'=>true,'followUp'=>$this->getFollowupForLastQuestion(),'examComplete'=>$nextQuestion->ID == -1];
         
+    }
 
-        // return ['success'=>true];
+    private function getFollowupForLastQuestion()
+    {
+        $followupText = 'N/A';
+        $followup = DB::table('journey_followups')
+                    ->where('AnswerID',$this->data['data'])
+                    ->first();
+        
+        if($followup->ID)
+        {
+            $followupText = $followup->FollowupText;
+        }
+
+        return $followupText;
     }
 
     private function getNextQuestion()
