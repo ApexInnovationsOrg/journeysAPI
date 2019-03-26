@@ -40,7 +40,19 @@ class Exam
         $read = $this->pdo->prepare('SELECT ID,QuestionText FROM journey_questions WHERE ID = :questionID');
         $read->execute([':questionID'=>end($lastQuestionArr)]);
         $results = $read->fetchAll(PDO::FETCH_ASSOC);
-        return $results;
+
+
+        $content = DB::table('journey_content')
+                ->select('Content')
+                ->where('QuestionID',end($lastQuestionArr))
+                ->get();
+        $contentArr = [];
+        foreach($content as $piece)
+        {
+            array_push($contentArr,$piece->Content);
+        }
+
+        return ['question'=>$results,'content'=>$contentArr];
     }
 
     public function completeExam()
@@ -117,6 +129,10 @@ class Exam
                     ->where('ID',$answer->NextQuestionID)
                     ->first();
 
+
+        $content = DB::table('journey_content')
+                        ->where('QuestionID',$answer->NextQuestionID)
+                        ->get();
 
 
         if($answer->NextQuestionID === -1)

@@ -47,6 +47,7 @@ class Forest
 
         foreach ($questions as $key => $question) {
             $questions[$key]['Answers'] = $this->getAnswers($question['ID']);
+            $questions[$key]['Contents'] = DB::table('journey_content')->where('QuestionID',$question['ID'])->get();
         }
         
         return $questions;
@@ -58,6 +59,16 @@ class Forest
         $read->execute([':treeID'=>$treeID]);
         $results = $read->fetchAll(PDO::FETCH_ASSOC);
         
+        // foreach($results as $result)
+        // {
+
+        //     $contents = DB::table('journey_content')
+        //                     ->where('QuestionID',$result['ID'])
+        //                     ->get();
+
+        //     $result['Contents'] = $contents;
+        // }
+
         return $results;
     }
 
