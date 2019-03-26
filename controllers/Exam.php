@@ -146,16 +146,42 @@ class Exam
 
     public function getExamResultsAction()
     {
-        return ['completed'=>$this->exam->JourneyCompleted,'score'=>$this->exam->Score,'numberOfQuestions'=>count(explode(',', $this->exam->QuestionsAsked))];
+        return ['completed'=>$this->exam->JourneyCompleted,'score'=>$this->getScore(),'numberOfQuestions'=>count(explode(',', $this->exam->QuestionsAsked))];
     }
 
-    
+    private function getScore()
+    {
+        $score = 0;
+        $answersArr = explode(',', $this->exam->AnswersGiven);
+
+        foreach($answersArr as $answerID)
+        {
+            $answer = DB::table('journey_answers')
+                            ->where('ID',$answerID)
+                            ->first();
+
+            $score += $answer->Weight;
+        }
+
+        return $score;
+
+    }
 
     private function getExam()
     {
-        $exam = JourneyResults::where('UserID',$this->user->ID)
-                        ->where('JourneyCompleted',null)
+        if($this->data['action'] == 'getExamResults')
+        {
+            $exam = JourneyResults::where('UserID',$this->user->ID)
+                        ->whereNotNull('JourneyCompleted')
+                        ->orderBy('ID','desc')
                         ->first();
+        }
+        else
+        {
+            $exam = JourneyResults::where('UserID',$this->user->ID)
+            ->where('JourneyCompleted',null)
+            ->first();
+        }
         if(empty($exam))
         {
             $exam = $this->createNewExam();
