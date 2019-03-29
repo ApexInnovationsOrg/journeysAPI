@@ -13,9 +13,9 @@ header('Access-Control-Allow-Origin: *');
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, X-Requested-With");
 
+
 const DEVELOPMENT = true;
 $user = null;
-
 if(isset($_SESSION['AdminID']))
 {
     handleAdminSession();
@@ -54,9 +54,20 @@ function validUser()
     $userOrganization = $userDepartment->Organization();
     return $userOrganization->ID == 221;
 }
-$inputJSON = file_get_contents('php://input');
-$input = json_decode($inputJSON, TRUE);
+// error_log(print_r($_FILES,1));
+if($_FILES)
+{
+    $input = json_decode($_REQUEST['json'],true);
+    
+}
+else
+{
 
+    $inputJSON = file_get_contents('php://input');
+    
+    $input = json_decode($inputJSON, TRUE);
+}
+// error_log(print_r($input,1));
 if(DEVELOPMENT)
 {
     $user = new apx_User(152002);
@@ -64,6 +75,8 @@ if(DEVELOPMENT)
 
 if(validUser() || $input['controller'] == 'Exam')
 {
+ 
+
     //wrap the whole thing in a try-catch block to catch any wayward exceptions!
     try {
         //get all of the parameters in the POST/GET request
