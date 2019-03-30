@@ -4,6 +4,7 @@ use Illuminate\Database\Capsule\Manager as DB;
 use Dotenv\Dotenv as Dotenv;
 use OpenCloud\Rackspace;
 use OpenCloud\ObjectStore\Constants as Constant;
+use app\Models\journey_content as JourneyContent;
 
 class Content
 {
@@ -79,8 +80,12 @@ class Content
 
         $this->data['content'] = json_encode(["type"=>"masterMedia","title"=>$name,"src"=>$string]);
 
-        return $this->createNewContentAction();
 
+        $masterMedia = JourneyContent::firstOrNew(['QuestionID'=>$this->data['questionID']]);
+        
+        $masterMedia->Content = $this->data['content'];
+
+        return $masterMedia->save();
     }
 
     
