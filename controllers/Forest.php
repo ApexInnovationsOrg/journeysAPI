@@ -89,4 +89,15 @@ class Forest
         
     }
 
+    public function createTreeAction()
+    {
+        return DB::table('journey_trees')
+            ->insertGetId(['Name'=>$this->data['name'],'ForestID'=>$this->data['forestID']]);
+    }
+
+    public function createForestAction()
+    {
+        return DB::table('journey_forests')
+            ->insertGetId(['Name'=>$this->data['name']]);
+    }
 }
