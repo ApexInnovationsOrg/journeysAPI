@@ -5,6 +5,11 @@
 use Illuminate\Database\Capsule\Manager as Capsule;  
 use Dotenv\Dotenv as Dotenv;
 
+$session = new \RedisSessionHandler();
+$session->register();
+session_name('ApexAdmin');
+session_start();
+
 
 $dotenv = new Dotenv($_SERVER['DOCUMENT_ROOT'] . '/JourneyAPI/');
 $dotenv->load();

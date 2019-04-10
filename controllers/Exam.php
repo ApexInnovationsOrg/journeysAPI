@@ -204,7 +204,7 @@ class Exam
     private function getExamMaster()
     {
         $master = DB::table('journey_paths')
-                        ->where('TreeID','1')//need to get the journey ID they are launching
+                        ->where('TreeID','4')//need to get the journey ID they are launching
                         ->where('Master','Y')
                         ->first();
         return $master;
