@@ -21,12 +21,14 @@ class Exam
         //Open database connection
         $this->pdo = apx_pdoConn::getConnection();
         $this->exam = $this->getExam();
+        
     }
 
     public function getTreeAction()
     {
         $read = $this->pdo->prepare('SELECT * FROM journey_trees JT JOIN journey_paths JP on JP.TreeID = JT.ID JOIN journey_questions JQ ON JP.QuestionID = JQ.ID WHERE JT.ID = :journeyTree');
-        $read->execute([':journeyTree'=>1]);
+        
+        $read->execute([':journeyTree'=>$this->_params['treeID']]);
         $results = $read->fetchAll(PDO::FETCH_ASSOC);
         return $results;
     }
@@ -34,11 +36,11 @@ class Exam
     public function getQuestionAction()
     {
 
-      
+        
         $lastQuestionArr = explode(',',$this->exam->QuestionsAsked);
         
-        $read = $this->pdo->prepare('SELECT ID,QuestionText FROM journey_questions WHERE ID = :questionID');
-        $read->execute([':questionID'=>end($lastQuestionArr)]);
+        $read = $this->pdo->prepare('SELECT ID,QuestionText FROM journey_questions WHERE ID = :questionID AND TreeID = :treeID');
+        $read->execute([':questionID'=>end($lastQuestionArr),':treeID'=>$this->_params['treeID']]);
         $results = $read->fetchAll(PDO::FETCH_ASSOC);
 
 
@@ -194,18 +196,22 @@ class Exam
         $exam = new JourneyResults;
 
         $exam->UserID = $this->user->ID;
-        $exam->JourneyTreeID = 1;
+        $exam->JourneyTreeID = $this->_params['treeID'];
         $exam->JourneyStarted = date("Y-m-d H:i:s");
-        $exam->QuestionsAsked = $this->getExamMaster()->QuestionID;
+        $exam->QuestionsAsked = $this->getExamMaster()->MasterQuestionID;
         $exam->save();
         return $this->getExam();
     }
 
+    // private function userValidForExam()
+    // {
+
+    // }
+
     private function getExamMaster()
     {
-        $master = DB::table('journey_paths')
-                        ->where('TreeID','4')//need to get the journey ID they are launching
-                        ->where('Master','Y')
+        $master = DB::table('journey_trees')
+                        ->where('ID',$this->_params['treeID'])
                         ->first();
         return $master;
 
