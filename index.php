@@ -9,12 +9,13 @@ require_once (__DIR__.'/vendor/autoload.php');
 
 require_once 'app/start.php';
 
-header('Access-Control-Allow-Origin: *');
+header("Access-Control-Allow-Origin: ".$_SERVER['HTTP_ORIGIN']);
+header('Access-Control-Allow-Credentials: true');
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, X-Requested-With");
 
 
-const DEVELOPMENT = true;
+const DEVELOPMENT = false;
 $user = null;
 if(isset($_SESSION['AdminID']))
 {
@@ -123,7 +124,7 @@ else
 //    error_log('3');
     $result = array();
     $result['success'] = false;
-    $result['errormsg'] = "You are not logged on to the admin website! <div style='font-size:2em'>Go to The <strong style='font-size:1.25em'><u><a target='blank' href='/admin/Home.php'>Admin Site</a></u></strong> and re-log in. </div><br/>UserID: " . $user->ID;
+    $result['errormsg'] = "You are not logged on to the admin website! Go to The Admin Site and re-log in. UserID: " . $user->ID;
 }
 // error_log(print_r($result,1));
 //echo the result of the API call
