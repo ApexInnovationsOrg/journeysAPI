@@ -174,6 +174,7 @@ class Exam
         if($this->data['action'] == 'getExamResults')
         {
             $exam = JourneyResults::where('UserID',$this->user->ID)
+                        ->where('JourneyTreeID',$this->_params['treeID'])
                         ->whereNotNull('JourneyCompleted')
                         ->orderBy('ID','desc')
                         ->first();
@@ -181,6 +182,7 @@ class Exam
         else
         {
             $exam = JourneyResults::where('UserID',$this->user->ID)
+            ->where('JourneyTreeID',$this->_params['treeID'])
             ->where('JourneyCompleted',null)
             ->first();
         }
