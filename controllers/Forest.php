@@ -33,7 +33,7 @@ class Forest
 
     public function getSingleForestAction()
     {
-        $read = $this->pdo->prepare('SELECT ID, Name, MasterQuestionID, TreeOrder FROM journey_trees WHERE ForestID = :forestID');
+        $read = $this->pdo->prepare('SELECT ID, Name, MasterNodeID, TreeOrder FROM journey_trees WHERE ForestID = :forestID');
         $read->execute([':forestID'=>$this->data['data']]);
         $results = $read->fetchAll(PDO::FETCH_ASSOC);
         return $results;
@@ -43,19 +43,19 @@ class Forest
     public function getTreeAction()
     {
        
-        $questions = $this->getQuestions($this->data['data']);
+        $nodes = $this->getNodes($this->data['data']);
 
-        foreach ($questions as $key => $question) {
-            $questions[$key]['Answers'] = $this->getAnswers($question['ID']);
-            $questions[$key]['Contents'] = DB::table('journey_content')->where('QuestionID',$question['ID'])->get();
+        foreach ($nodes as $key => $node) {
+            $nodes[$key]['Answers'] = $this->getAnswers($node['ID']);
+            $nodes[$key]['Contents'] = DB::table('journey_content')->where('NodeID',$node['ID'])->get();
         }
         
-        return $questions;
+        return $nodes;
     }
 
-    private function getQuestions($treeID)
+    private function getNodes($treeID)
     {
-        $read = $this->pdo->prepare('SELECT * FROM journey_questions WHERE TreeID = :treeID');
+        $read = $this->pdo->prepare('SELECT * FROM journey_nodes WHERE TreeID = :treeID');
         $read->execute([':treeID'=>$treeID]);
         $results = $read->fetchAll(PDO::FETCH_ASSOC);
         
@@ -72,20 +72,20 @@ class Forest
         return $results;
     }
 
-    private function getAnswers($questionID)
+    private function getAnswers($nodeID)
     {   
-        $read = $this->pdo->prepare('SELECT JA.*,JF.ID AS `FollowupTextID`,JF.FollowupText FROM journey_answers JA LEFT JOIN journey_followups JF ON JF.AnswerID = JA.ID WHERE QuestionID = :questionID');
-        $read->execute([':questionID'=>$questionID]);
+        $read = $this->pdo->prepare('SELECT JA.*,JF.ID AS `FollowupTextID`,JF.FollowupText FROM journey_answers JA LEFT JOIN journey_followups JF ON JF.AnswerID = JA.ID WHERE NodeID = :nodeID');
+        $read->execute([':nodeID'=>$nodeID]);
         $answers = $read->fetchAll(PDO::FETCH_ASSOC);
 
         return $answers;
     }
 
-    public function setMasterQuestionAction()
+    public function setMasterNodeAction()
     {
-        $write = $this->pdo->prepare("UPDATE journey_trees SET MasterQuestionID = :masterQuestionID WHERE ID = :treeID");
+        $write = $this->pdo->prepare("UPDATE journey_trees SET MasterNodeID = :masterNodeID WHERE ID = :treeID");
                                       
-        $write->execute([':masterQuestionID'=>$this->data['masterQuestionID'],':treeID'=>$this->data['treeID']]);
+        $write->execute([':masterNodeID'=>$this->data['masterNodeID'],':treeID'=>$this->data['treeID']]);
         
     }
 

@@ -31,16 +31,16 @@ class Content
     {
         error_log('creating new content');
         
-        $write = $this->pdo->prepare("INSERT INTO journey_content (QuestionID,Content) VALUES (:questionID,:content)");
-        $write->execute([':questionID'=>$this->data['questionID'],':content'=>$this->data['content']]);
+        $write = $this->pdo->prepare("INSERT INTO journey_content (NodeID,Content) VALUES (:nodeID,:content)");
+        $write->execute([':nodeID'=>$this->data['nodeID'],':content'=>$this->data['content']]);
 
         return $this->pdo->lastInsertId();
     }
     
     public function deleteContentAction()
     {
-        $write = $this->pdo->prepare("UPDATE journey_content SET QuestionID = QuestionID * -1 WHERE ID = :questionID");
-        $write->execute([':questionID'=>$this->data['questionID']]);
+        $write = $this->pdo->prepare("UPDATE journey_content SET NodeID = NodeID * -1 WHERE ID = :nodeID");
+        $write->execute([':nodeID'=>$this->data['nodeID']]);
     }
     
     public function updateContentAction()
@@ -70,7 +70,7 @@ class Content
         
         
         $handle = fopen($filename, 'r');
-        $object = $container->uploadObject('question' . $this->data['questionID'] . $name, $handle);
+        $object = $container->uploadObject('node' . $this->data['nodeID'] . $name, $handle);
 
         $publicURL = $object->getPublicUrl(Constant\UrlType::SSL);
 
@@ -81,7 +81,7 @@ class Content
         $this->data['content'] = json_encode(["type"=>"masterMedia","title"=>$name,"src"=>$string]);
 
 
-        $masterMedia = JourneyContent::firstOrNew(['QuestionID'=>$this->data['questionID']]);
+        $masterMedia = JourneyContent::firstOrNew(['NodeID'=>$this->data['nodeID']]);
         
         $masterMedia->Content = $this->data['content'];
 

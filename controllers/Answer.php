@@ -25,8 +25,8 @@ class Answer
 
     public function createNewLinkAction()
     {
-        $write = $this->pdo->prepare("UPDATE journey_answers SET NextQuestionID = :nextQuestionID WHERE ID = :answerID");
-        $params = [':nextQuestionID'=>$this->data['nextQuestionID'],':answerID'=>$this->data['answerID']];
+        $write = $this->pdo->prepare("UPDATE journey_answers SET NextNodeID = :nextNodeID WHERE ID = :answerID");
+        $params = [':nextNodeID'=>$this->data['nextNodeID'],':answerID'=>$this->data['answerID']];
         // error_log(print_r($params,1));
         $write->execute($params);
         return true;
@@ -34,7 +34,7 @@ class Answer
 
     public function removeLinkAction()
     {
-        $write = $this->pdo->prepare("UPDATE journey_answers SET NextQuestionID = -1 WHERE ID = :answerID");
+        $write = $this->pdo->prepare("UPDATE journey_answers SET NextNodeID = -1 WHERE ID = :answerID");
         $params = [':answerID'=>$this->data['answerID']];
         // error_log(print_r($params,1));
         $write->execute($params);
@@ -76,7 +76,7 @@ class Answer
     {
         if(isset($this->data['answerID']))
         {
-            $delete = $this->pdo->prepare("UPDATE journey_answers SET QuestionID = QuestionID * -1 WHERE ID = :answerID");
+            $delete = $this->pdo->prepare("UPDATE journey_answers SET NodeID = NodeID * -1 WHERE ID = :answerID");
             $delete->execute([':answerID'=>$this->data['answerID']]);
         }
     }
@@ -91,8 +91,8 @@ class Answer
 
     public function createnewanswerAction()
     {
-        $write = $this->pdo->prepare("INSERT INTO journey_answers (AnswerText, QuestionID, NextQuestionID, Weight) VALUE (:answerText, :questionID, '-1', '0')");
-        $write->execute([':answerText'=>$this->data['answerText'],':questionID'=>$this->data['questionID']]);
+        $write = $this->pdo->prepare("INSERT INTO journey_answers (AnswerText, NodeID, NextNodeID, Weight) VALUE (:answerText, :nodeID, '-1', '0')");
+        $write->execute([':answerText'=>$this->data['answerText'],':nodeID'=>$this->data['nodeID']]);
 
         $answerID = $this->pdo->lastInsertId();
 

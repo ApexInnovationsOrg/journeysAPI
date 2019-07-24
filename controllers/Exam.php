@@ -26,35 +26,38 @@ class Exam
 
     public function getTreeAction()
     {
-        $read = $this->pdo->prepare('SELECT * FROM journey_trees JT JOIN journey_paths JP on JP.TreeID = JT.ID JOIN journey_questions JQ ON JP.QuestionID = JQ.ID WHERE JT.ID = :journeyTree');
+        $read = $this->pdo->prepare('SELECT * FROM journey_trees JT JOIN journey_paths JP on JP.TreeID = JT.ID JOIN journey_nodes JQ ON JP.NodeID = JQ.ID WHERE JT.ID = :journeyTree');
         
         $read->execute([':journeyTree'=>$this->_params['treeID']]);
         $results = $read->fetchAll(PDO::FETCH_ASSOC);
         return $results;
     }
 
-    public function getQuestionAction()
+    public function getquestionAction()
+    {
+        return $this->getNodeAction();
+    }
+
+    public function getNodeAction()
     {
 
+        $lastNodeHitArr = explode(',',$this->exam->NodesHit);
         
-        $lastQuestionArr = explode(',',$this->exam->QuestionsAsked);
-        
-        $read = $this->pdo->prepare('SELECT ID,QuestionText FROM journey_questions WHERE ID = :questionID AND TreeID = :treeID');
-        $read->execute([':questionID'=>end($lastQuestionArr),':treeID'=>$this->_params['treeID']]);
+        $read = $this->pdo->prepare('SELECT ID,NodeText FROM journey_nodes WHERE ID = :nodeID AND TreeID = :treeID');
+        $read->execute([':nodeID'=>end($lastNodeHitArr),':treeID'=>$this->_params['treeID']]);
         $results = $read->fetchAll(PDO::FETCH_ASSOC);
 
 
         $content = DB::table('journey_content')
                 ->select('Content')
-                ->where('QuestionID',end($lastQuestionArr))
+                ->where('NodeID',end($lastNodeHitArr))
                 ->get();
         $contentArr = [];
         foreach($content as $piece)
         {
             array_push($contentArr,$piece->Content);
         }
-
-        return ['question'=>$results,'content'=>$contentArr];
+        return ['node'=>$results,'content'=>$contentArr];
     }
 
     public function completeExam()
@@ -68,9 +71,9 @@ class Exam
     public function getAnswersAction()
     {
 
-        $lastQuestionArr = explode(',',$this->exam->QuestionsAsked);
-        $read = $this->pdo->prepare('SELECT ID, AnswerText FROM journey_answers WHERE QuestionID = :questionID');
-        $read->execute([':questionID'=>end($lastQuestionArr)]);
+        $lastNodeHitArr = explode(',',$this->exam->NodesHit);
+        $read = $this->pdo->prepare('SELECT ID, AnswerText FROM journey_answers WHERE NodeID = :nodeID');
+        $read->execute([':nodeID'=>end($lastNodeHitArr)]);
         $results = $read->fetchAll(PDO::FETCH_ASSOC);
 
         return $results;
@@ -79,22 +82,21 @@ class Exam
     public function submitAnswerAction()
     {
         $answer = $this->data['data'];
-        $questionArr = explode(',',$this->exam->QuestionsAsked);
 
         $this->exam->AnswersGiven .= ',' . $answer;
      
         $this->exam->AnswersGiven = trim($this->exam->AnswersGiven,",");
     
-        $nextQuestion = $this->getNextQuestion();
+        $nextNode = $this->getNextNode();
 
-        $this->exam->QuestionsAsked .= ',' . $nextQuestion->ID;
-        $this->exam->QuestionsAsked = trim($this->exam->QuestionsAsked,",");
+        $this->exam->NodesHit .= ',' . $nextNode->ID;
+        $this->exam->NodesHit = trim($this->exam->NodesHit,",");
 
         $this->exam->save();
 
         //run complete exam routine;
 
-        return ['success'=>true,'followUp'=>$this->getFollowupForLastQuestion(),'examComplete'=>$nextQuestion->ID == -1];
+        return ['success'=>true,'followUp'=>$this->getFollowupForLastQuestion(),'examComplete'=>$nextNode->ID == -1];
         
     }
 
@@ -104,20 +106,20 @@ class Exam
         $followup = DB::table('journey_followups')
                     ->where('AnswerID',$this->data['data'])
                     ->first();
-        
-        if($followup->ID)
+        if($followup)
         {
             $followupText = $followup->FollowupText;
         }
 
+
         return $followupText;
     }
 
-    private function getNextQuestion()
+    private function getNextNode()
     {
 
 
-        $questionArr = explode(',',$this->exam->QuestionsAsked);
+        $questionArr = explode(',',$this->exam->NodesHit);
         $answerArr = explode(',',$this->exam->AnswersGiven);
 
 
@@ -127,17 +129,17 @@ class Exam
 
         
 
-        $question = DB::table('journey_questions')
-                    ->where('ID',$answer->NextQuestionID)
+        $question = DB::table('journey_nodes')
+                    ->where('ID',$answer->NextNodeID)
                     ->first();
 
 
         $content = DB::table('journey_content')
-                        ->where('QuestionID',$answer->NextQuestionID)
+                        ->where('NodeID',$answer->NextNodeID)
                         ->get();
 
 
-        if($answer->NextQuestionID === -1)
+        if($answer->NextNodeID === -1)
         {
             $this->completeExam();
             return (object)['ID'=>-1];
@@ -173,8 +175,8 @@ class Exam
     {
         if($this->data['action'] == 'getExamResults')
         {
-            $exam = JourneyResults::where('UserID',$this->user->ID)
-                        ->where('JourneyTreeID',$this->_params['treeID'])
+            $exam = JourneyResults::where('UserID','=',$this->user->ID)
+                        ->where('JourneyTreeID','=',$this->_params['treeID'])
                         ->whereNotNull('JourneyCompleted')
                         ->orderBy('ID','desc')
                         ->first();
@@ -190,25 +192,28 @@ class Exam
         {
             $exam = $this->createNewExam();
         }
+
+        if($exam->NodesHit == null)
+        {
+            $exam->NodesHit = $this->getExamMaster()->MasterNodeID;
+            $exam->save();
+        }
+
+
         return $exam;
     }
 
     private function createNewExam()
     {
         $exam = new JourneyResults;
-
         $exam->UserID = $this->user->ID;
         $exam->JourneyTreeID = $this->_params['treeID'];
         $exam->JourneyStarted = date("Y-m-d H:i:s");
-        $exam->QuestionsAsked = $this->getExamMaster()->MasterQuestionID;
+        $exam->NodesHit = $this->getExamMaster()->MasterNodeID;
         $exam->save();
         return $this->getExam();
     }
 
-    // private function userValidForExam()
-    // {
-
-    // }
 
     private function getExamMaster()
     {
