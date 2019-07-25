@@ -35,8 +35,8 @@ class Node
     public function createNewNodeAction()
     {
         
-        $write = $this->pdo->prepare("INSERT INTO `ApexProducts`.`journey_nodes` (`NodeText`, `Active`, `TreeID`) VALUES (:NodeText, 'Y', :treeID);");
-        $write->execute([':NodeText'=>$this->data['nodeText'],':treeID'=>$this->data['treeID']]);
+        $write = $this->pdo->prepare("INSERT INTO `ApexProducts`.`journey_nodes` (`NodeText`, `Active`, `TreeID`, `TypeID`) VALUES (:NodeText, 'Y', :treeID,:typeID);");
+        $write->execute([':NodeText'=>$this->data['nodeText'],':treeID'=>$this->data['treeID'],':typeID'=>$this->data['typeID']]);
 
         $nodeID = $this->pdo->lastInsertId();
 
