@@ -55,13 +55,13 @@ class Node
         return false;
     }
 
-    public function updatequestionAction()
+    public function updatenodeAction()
     {
         $write = $this->pdo->prepare("UPDATE journey_nodes SET NodeText = :NodeText WHERE ID = :nodeID");
         $write->execute([':NodeText' => $this->data['nodeText'],':nodeID'=>$this->data['nodeID']]);
     }
 
-    public function moveQuestionAction()
+    public function movenodeAction()
     {
 
         $write = $this->pdo->prepare("UPDATE journey_nodes SET PositionX = :positionX, PositionY = :positionY WHERE ID = :nodeID");
@@ -76,7 +76,7 @@ class Node
         $write->execute([':nodeID'=>$nodeID]);
     }
 
-    public function deleteQuestionAction()
+    public function deletenodeAction()
     {
         $write = $this->pdo->prepare("UPDATE journey_nodes SET TreeID = TreeID * -1 WHERE ID = :nodeID");
         $write->execute([':nodeID'=>$this->data['nodeID']]);
