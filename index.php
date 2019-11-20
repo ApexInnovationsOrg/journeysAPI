@@ -1,13 +1,17 @@
 <?php
 // Define path to data folder
 //error_reporting(E_ALL);
-require_once($_SERVER['DOCUMENT_ROOT'] . '/DBCONNECT.php');			// Allow Database Connections
-require_once($_SERVER['DOCUMENT_ROOT'] . '/classes/apx_pdoConn.php');
+// require_once($_SERVER['DOCUMENT_ROOT'] . '/DBCONNECT.php');			// Allow Database Connections
+// require_once($_SERVER['DOCUMENT_ROOT'] . '/classes/apx_pdoConn.php');
 // require_once($_SERVER['DOCUMENT_ROOT'] . '/admin/SESSIONCONFIG.php');
 
 require_once (__DIR__.'/vendor/autoload.php');
 
 require_once 'app/start.php';
+
+
+use app\Models\user as user;
+use app\Models\employee as employee;
 
 header("Access-Control-Allow-Origin: ".$_SERVER['HTTP_ORIGIN']);
 header('Access-Control-Allow-Credentials: true');
@@ -15,42 +19,49 @@ header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, X-Requested-With");
 
 
-const DEVELOPMENT = false;
+const DEVELOPMENT = true;
 $user = null;
 if(isset($_SESSION['AdminID']))
 {
+
     handleAdminSession();
 }
 else
 {
+    // error_log(print_r($_SESSION,1));
     // session_abort();
-    include_once($_SERVER['DOCUMENT_ROOT'] . '/SESSIONCONFIG.php');
+    // include_once($_SERVER['DOCUMENT_ROOT'] . '/SESSIONCONFIG.php');
     if(isset($_SESSION['userID'])) {
         handleUserSession();
     }
     else
     {
-        $user = new apx_User(0);
+        $user = user::find(0);
     }
 }
 
 function handleAdminSession()
 {
     global $user;
-    $employee = new apx_Employee($_SESSION['AdminID']);
-    $user = new apx_User('Login = "' . $employee->Email . '"');
+    $employee = employee::find($_SESSION['AdminID']);
+    $user = user::where('Login', $employee->Email)->first();
 }
 
 function handleUserSession()
 {
+
     global $user;
-    $user = new apx_User($_SESSION['userID']);
+    $user = user::find($_SESSION['userID']);
 }
 
 function validUser()
 {
     global $user;
-
+    if($user == null)
+    {
+        return false;
+    }
+    
     $userDepartment = $user->Department();
     $userOrganization = $userDepartment->Organization();
     return $userOrganization->ID == 221;
@@ -71,13 +82,12 @@ else
 // error_log(print_r($input,1));
 if(DEVELOPMENT)
 {
-    $user = new apx_User(152002);
+    $user = user::find(152002);
 }
 
 if(validUser() || $input['controller'] == 'Exam')
 {
  
-
     //wrap the whole thing in a try-catch block to catch any wayward exceptions!
     try {
         //get all of the parameters in the POST/GET request

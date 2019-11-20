@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Capsule\Manager as DB;
 use Dotenv\Dotenv as Dotenv;
+error_reporting(-1);
 
 
 class Forest
@@ -15,11 +16,22 @@ class Forest
 
     public function __construct($params,$user)
     {
+
+        $whoops = new \Whoops\Run;
+
+        $whoops->prependHandler(new \Whoops\Handler\JsonResponseHandler);
+        
+        $whoops->register();
+
         $this->_params = $params;
         $this->user = $user;
         $this->data = $params;
         //Open database connection
-        $this->pdo = apx_pdoConn::getConnection();
+        // error_log(\DB);
+        $this->pdo = DB::connection()->getPdo();
+
+        error_log(print_r($this->pdo,1));
+
         
     }
 

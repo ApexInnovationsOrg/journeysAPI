@@ -19,7 +19,7 @@ class Node
         $this->user = $user;
         $this->data = $params; 
         //Open database connection
-        $this->pdo = apx_pdoConn::getConnection();
+        $this->pdo = DB::connection()->getPdo();
         
     }
 

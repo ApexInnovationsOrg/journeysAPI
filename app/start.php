@@ -4,20 +4,35 @@
 
 use Illuminate\Database\Capsule\Manager as Capsule;  
 use Dotenv\Dotenv as Dotenv;
+use app\Utils\RedisSessionHandler;
+
+$whoops = new \Whoops\Run;
+
+
+if(!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+	/* special ajax here */
+}
+else
+{
+    $whoops->prependHandler(new \Whoops\Handler\PrettyPageHandler);
+}
+$whoops->prependHandler(new \Whoops\Handler\JsonResponseHandler);
+$whoops->register();
+
 
 if(!isset($_COOKIE['ApexInnovations']) && isset($_COOKIE['ApexAdmin']))
 {
-	$session = new \RedisSessionHandler();
+	$session = new RedisSessionHandler(['gc_maxlifetime'=>10080*60]);
 	$session->register();
 	session_name('ApexAdmin');
 	session_start();
 }
-
-$dotenv = new Dotenv($_SERVER['DOCUMENT_ROOT'] . '/JourneyAPI/');
+$dotenv = Dotenv::create(dirname(__DIR__));
 $dotenv->load();
  
 $capsule = new Capsule; 
  
+
 
 $capsule->addConnection(array(
     'driver'    => 'mysql',

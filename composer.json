@@ -3,16 +3,13 @@
         "vlucas/phpdotenv": "*",
 		"predis/predis":"*",
         "illuminate/database": "5.1.*",
-        "rackspace/php-opencloud": "dev-master"
+        "rackspace/php-opencloud": "dev-master",
+        "filp/whoops": "^2.5"
     },
     "autoload": {
         "psr-4":{
             "app\\": "app",
             "controllers\\":"controllers"
-        },
-        "classmap":[
-            "vendor/autoload.php",
-            "../classes"
-        ]
+        }
     }
 }

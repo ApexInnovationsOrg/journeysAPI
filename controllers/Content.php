@@ -23,7 +23,7 @@ class Content
         $this->files = $_FILES;
 
         //Open database connection
-        $this->pdo = apx_pdoConn::getConnection();
+        $this->pdo = DB::connection()->getPdo();
         
     }
 
