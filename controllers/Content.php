@@ -29,7 +29,7 @@ class Content
 
     public function createNewContentAction()
     {
-        error_log('creating new content');
+        // error_log('creating new content');
         
         $write = $this->pdo->prepare("INSERT INTO journey_content (NodeID,Content) VALUES (:nodeID,:content)");
         $write->execute([':nodeID'=>$this->data['nodeID'],':content'=>$this->data['content']]);
@@ -83,6 +83,8 @@ class Content
 
         $masterMedia = JourneyContent::firstOrNew(['NodeID'=>$this->data['nodeID']]);
         
+        error_log(print_r($masterMedia,1));
+
         $masterMedia->Content = $this->data['content'];
 
         return $masterMedia->save();

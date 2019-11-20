@@ -13,6 +13,6 @@ class journey_content extends Eloquent {
 	protected $table = 'journey_content';
 
 	protected $primaryKey = 'ID';
-	protected $fillable = array('QuestionID','Content');
+	protected $fillable = array('NodeID','Content');
 
 }

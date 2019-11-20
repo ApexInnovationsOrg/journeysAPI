@@ -17,21 +17,11 @@ class Forest
     public function __construct($params,$user)
     {
 
-        $whoops = new \Whoops\Run;
-
-        $whoops->prependHandler(new \Whoops\Handler\JsonResponseHandler);
-        
-        $whoops->register();
-
         $this->_params = $params;
         $this->user = $user;
         $this->data = $params;
         //Open database connection
-        // error_log(\DB);
         $this->pdo = DB::connection()->getPdo();
-
-        error_log(print_r($this->pdo,1));
-
         
     }
 
