@@ -1,8 +1,9 @@
-<?php
+<?php 
 
 use Illuminate\Database\Capsule\Manager as DB;
 use Dotenv\Dotenv as Dotenv;
 use app\Models\journey_results as JourneyResults;
+include('Forest.php');
 
 class Exam
 {
@@ -12,6 +13,8 @@ class Exam
     private $user;
     private $files;
     private $exam;
+    private $wholeTree;
+    private $foundNodes = [];
 
     public function __construct($params,$user)
     {
@@ -21,7 +24,8 @@ class Exam
         //Open database connection
         $this->pdo = DB::connection()->getPdo();
         $this->exam = $this->getExam();
-        
+        $completeTree = new Forest(['data'=>$this->exam->JourneyTreeID],$this->user);
+        $this->wholeTree = $completeTree->getTreeAction();
     }
 
     public function getTreeAction()
@@ -42,7 +46,6 @@ class Exam
     {
 
         $lastNodeHitArr = explode(',',$this->exam->NodesHit);
-        
         $read = $this->pdo->prepare('SELECT ID,NodeText FROM journey_nodes WHERE ID = :nodeID AND TreeID = :treeID');
         $read->execute([':nodeID'=>end($lastNodeHitArr),':treeID'=>$this->_params['treeID']]);
         $results = $read->fetchAll(PDO::FETCH_ASSOC);
@@ -57,7 +60,55 @@ class Exam
         {
             array_push($contentArr,$piece->Content);
         }
-        return ['node'=>$results,'content'=>$contentArr];
+
+        $totalNodes =  count($this->findNextNodes($this->findInTree($this->getExamMaster()->MasterNodeID)));
+        
+        $possibleNodes = count($this->getProgress());
+
+
+        $progress = ($totalNodes - $possibleNodes) / $totalNodes;
+
+
+        return ['node'=>$results,'content'=>$contentArr,'progress'=>$progress];
+    }
+
+    private function getProgress()
+    {
+        
+        $lastNodeHitArr = explode(',',$this->exam->NodesHit);        
+        $currentNode = $this->findInTree(end($lastNodeHitArr));
+        $this->foundNodes = [];
+        return $this->findNextNodes($currentNode);
+   
+    }
+    private function findNextNodes($node)
+    {
+        if(!in_array($node['ID'],$this->foundNodes))
+        {  
+            $this->foundNodes[] = $node['ID'];
+            foreach($node['Answers'] as $answer)
+            {
+                // error_log(print_r($answer['NextNodeID'],1));
+                if($answer['NextNodeID'] !== -1)
+                {
+                    $this->findNextNodes($this->findInTree($answer['NextNodeID']));
+
+                }
+            }
+        }
+
+        return $this->foundNodes;
+    }
+
+    private function findInTree($nodeID)
+    {       
+        foreach($this->wholeTree as $node)
+        {
+            if($node['ID'] == $nodeID)
+            {
+                return $node;
+            }
+        }
     }
 
     public function completeExam()

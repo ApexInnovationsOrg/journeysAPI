@@ -2,8 +2,6 @@
 
 use Illuminate\Database\Capsule\Manager as DB;
 use Dotenv\Dotenv as Dotenv;
-error_reporting(-1);
-
 
 class Forest
 {
