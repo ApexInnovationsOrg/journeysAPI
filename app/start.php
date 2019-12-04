@@ -11,12 +11,12 @@ $whoops = new \Whoops\Run;
 
 if(!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
 	/* special ajax here */
+    $whoops->prependHandler(new \Whoops\Handler\JsonResponseHandler);
 }
 else
 {
     $whoops->prependHandler(new \Whoops\Handler\PrettyPageHandler);
 }
-$whoops->prependHandler(new \Whoops\Handler\JsonResponseHandler);
 $whoops->register();
 
 
@@ -27,7 +27,7 @@ if(!isset($_COOKIE['ApexInnovations']) && isset($_COOKIE['ApexAdmin']))
 	session_name('ApexAdmin');
 	session_start();
 }
-$dotenv = Dotenv::create(dirname(__DIR__));
+$dotenv = Dotenv::createMutable(dirname(__DIR__));
 $dotenv->load();
  
 $capsule = new Capsule; 

@@ -68,7 +68,6 @@ class Exam
 
         $progress = ($totalNodes - $possibleNodes) / $totalNodes;
 
-
         return ['node'=>$results,'content'=>$contentArr,'progress'=>$progress];
     }
 
@@ -201,7 +200,7 @@ class Exam
 
     public function getExamResultsAction()
     {
-        return ['completed'=>$this->exam->JourneyCompleted,'score'=>$this->getScore(),'numberOfQuestions'=>count(explode(',', $this->exam->QuestionsAsked))];
+        return ['completed'=>$this->exam->JourneyCompleted,'score'=>$this->getScore(),'numberOfQuestions'=>count(explode(',',$this->exam->NodesHit))];
     }
 
     private function getScore()
