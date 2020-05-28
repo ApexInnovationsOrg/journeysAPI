@@ -10,7 +10,7 @@ pipeline {
         }
         stage('Push to staging'){
             steps{
-                sh 'rsync -avzri --exclude="/*/*/" ./ bitnami@apexwebtest.apexinnovations.com:/apex/htdocs/Classroom'
+                sh 'rsync -avzri --exclude="/*/*/" ./ bitnami@apexwebtest.apexinnovations.com:/apex/htdocs/Classroom/journeysAPI'
             }
         }
     }
