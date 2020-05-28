@@ -3,6 +3,11 @@
 pipeline {
     agent any
     stages {
+		stage('Start'){
+            steps{
+                rocketSend message: "Build for journeysAPI Started", channel: 'jenkins'
+            }
+        }	
         stage('Install package') { 
             steps {
                 sh 'composer install' 
