@@ -1,6 +1,6 @@
 {
     "require": {
-        "vlucas/phpdotenv": "*",
+        "vlucas/phpdotenv": "5.0.0",
 		"predis/predis":"*",
         "illuminate/database": "5.1.*",
         "rackspace/php-opencloud": "dev-master",
