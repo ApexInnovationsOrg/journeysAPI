@@ -12,6 +12,7 @@ require_once 'app/start.php';
 use app\Models\user as user;
 use app\Models\employee as employee;
 
+
 header("Access-Control-Allow-Origin: ".$_SERVER['HTTP_ORIGIN']);
 header('Access-Control-Allow-Credentials: true');
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
