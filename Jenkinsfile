@@ -17,6 +17,7 @@ pipeline {
         stage('Install package') { 
             steps {
                 sh 'composer install' 
+                sh 'composer update' 
             }
         }
         stage('Push to staging'){
