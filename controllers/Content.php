@@ -54,8 +54,8 @@ class Content
     public function uploadMediaAction()
     {
         $client = new Rackspace(Rackspace::US_IDENTITY_ENDPOINT,array(
-            'username' =>  getenv('RACKSPACE_USER'),
-            'apiKey'   => getenv('RACKSPACE_API')
+            'username' =>  $_ENV['RACKSPACE_USER'],
+            'apiKey'   => $_ENV['RACKSPACE_API']
         ));
         $objectStoreService = $client->objectStoreService(null, 'ORD');
         

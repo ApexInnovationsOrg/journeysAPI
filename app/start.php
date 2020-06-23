@@ -27,7 +27,7 @@ if(!isset($_COOKIE['ApexInnovations']) && isset($_COOKIE['ApexAdmin']))
 	session_name('ApexAdmin');
 	session_start();
 }
-$dotenv = Dotenv::createMutable(dirname(__DIR__));
+$dotenv = Dotenv::createImmutable(dirname(__DIR__));
 $dotenv->load();
  
 $capsule = new Capsule; 
@@ -36,10 +36,10 @@ $capsule = new Capsule;
 
 $capsule->addConnection(array(
     'driver'    => 'mysql',
-    'host'      => getenv('DB_HOST'),
-    'database'  => getenv('DB_DATABASE'),
-    'username'  => getenv('DB_USERNAME'),
-    'password'  => getenv('DB_PASSWORD'),
+    'host'      => $_ENV['DB_HOST'],
+    'database'  => $_ENV['DB_DATABASE'],
+    'username'  => $_ENV['DB_USERNAME'],
+    'password'  => $_ENV['DB_PASSWORD'],
     'charset'   => 'utf8',
     'collation' => 'utf8_unicode_ci',
     'prefix'    => ''
