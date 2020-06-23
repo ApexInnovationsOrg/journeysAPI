@@ -17,6 +17,7 @@ header('Access-Control-Allow-Credentials: true');
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, X-Requested-With");
 
+
 const DEVELOPMENT = true;
 $user = null;
 if(isset($_SESSION['AdminID']))
